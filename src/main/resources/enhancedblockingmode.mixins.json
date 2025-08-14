@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "top.chexson.enhancedblockingmode.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "EnhancedBlockingMode.refmap.json",
+  "mixins": [
+        
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
