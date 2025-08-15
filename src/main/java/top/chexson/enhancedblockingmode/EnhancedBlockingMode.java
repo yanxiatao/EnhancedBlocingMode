@@ -34,8 +34,7 @@ import org.slf4j.Logger;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(EnhancedBlockingMode.MODID)
-public class EnhancedBlockingMode
-{
+public class EnhancedBlockingMode {
     // Define mod id in a common place for everything to reference
     public static final String MODID = "enhancedblockingmode";
     // Directly reference a slf4j logger

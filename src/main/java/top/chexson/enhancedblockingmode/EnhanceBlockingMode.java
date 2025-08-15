@@ -1,6 +1,6 @@
 package top.chexson.enhancedblockingmode;
 
-public enum BlockingMode {
+public enum EnhanceBlockingMode {
     DEFAULT,
     ENHANCED
 }

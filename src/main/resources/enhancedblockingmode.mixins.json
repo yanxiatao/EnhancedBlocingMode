@@ -5,9 +5,12 @@
   "compatibilityLevel": "JAVA_21",
   "refmap": "EnhancedBlockingMode.refmap.json",
   "mixins": [
-    "patternprovider.MixinPatternProvider"
+    "MixinSettings",
+    "patternprovider.MixinPatternProvider",
+    "patternprovider.MixinPatternProviderMenu"
   ],
   "client": [
+    "patternprovider.MixinPatternProviderScreen"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -30,8 +30,10 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import top.chexson.enhancedblockingmode.BlockingMode;
+import top.chexson.enhancedblockingmode.EnhanceBlockingMode;
 import top.chexson.enhancedblockingmode.EnSettings;
+import top.chexson.enhancedblockingmode.IPatternProvider;
+
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
@@ -40,7 +42,7 @@ import java.util.Set;
 
 
 @Mixin(PatternProviderLogic.class)
-public abstract class MixinPatternProvider {
+public abstract class MixinPatternProvider implements IPatternProvider {
 
     @Shadow
     @Final
@@ -64,7 +66,7 @@ public abstract class MixinPatternProvider {
             at = @At("TAIL"),remap = false
     )
     private void PatternProviderLogic(IManagedGridNode mainNode, PatternProviderLogicHost host, CallbackInfo ci) {
-        ((ConfigManager)configManager).registerSetting(EnSettings.BLOCKING_MODE, BlockingMode.ENHANCED);
+        ((ConfigManager)configManager).registerSetting(EnSettings.ENHANCED_BLOCKING_MODE, EnhanceBlockingMode.DEFAULT);
     }
 
 /*
@@ -113,8 +115,8 @@ public abstract class MixinPatternProvider {
 
 
     @Unique
-    public BlockingMode enhancedBlockingMode$getBlockingMode() {
-        return configManager.getSetting(EnSettings.BLOCKING_MODE);
+    public EnhanceBlockingMode enhancedBlockingMode$getBlockingMode() {
+        return configManager.getSetting(EnSettings.ENHANCED_BLOCKING_MODE);
     }
     @Unique
     private boolean enhancedBlockingMode$adapterAcceptAll(PatternProviderTarget target, KeyCounter[] inputHolder) {
@@ -216,7 +218,7 @@ public abstract class MixinPatternProvider {
             var adapter = target.target();
 
             if (this.isBlocking() && adapter.containsPatternInput(this.patternInputs)) {
-                if (this.enhancedBlockingMode$getBlockingMode() == BlockingMode.ENHANCED) {
+                if (this.enhancedBlockingMode$getBlockingMode() == EnhanceBlockingMode.ENHANCED) {
                     Set<AEKey> KeySet = new java.util.HashSet<>(Set.of());
                     for (var KeyCounter : inputHolder) {
                         KeySet.addAll(KeyCounter.keySet());
