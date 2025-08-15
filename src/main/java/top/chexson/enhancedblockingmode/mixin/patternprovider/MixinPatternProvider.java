@@ -1,11 +1,14 @@
 package top.chexson.enhancedblockingmode.mixin.patternprovider;
 
+import appeng.api.AECapabilities;
 import appeng.api.config.Actionable;
 import appeng.api.config.LockCraftingMode;
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.implementations.blockentities.ICraftingMachine;
 import appeng.api.networking.IManagedGridNode;
+import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEKey;
+import appeng.api.stacks.AEKeyType;
 import appeng.api.stacks.GenericStack;
 import appeng.api.stacks.KeyCounter;
 import appeng.api.storage.MEStorage;
@@ -13,19 +16,25 @@ import appeng.api.util.IConfigManager;
 import appeng.helpers.patternprovider.PatternProviderLogic;
 import appeng.helpers.patternprovider.PatternProviderLogicHost;
 import appeng.helpers.patternprovider.PatternProviderTarget;
-import appeng.helpers.patternprovider.PatternProviderTargetCache;
+import appeng.me.storage.CompositeStorage;
+import appeng.parts.automation.StackWorldBehaviors;
 import appeng.util.ConfigManager;
+import com.google.common.util.concurrent.Runnables;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import top.chexson.enhancedblockingmode.BlockingMode;
 import top.chexson.enhancedblockingmode.EnSettings;
-
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -35,7 +44,7 @@ public abstract class MixinPatternProvider {
 
     @Shadow
     @Final
-    private PatternProviderTargetCache[] targetCaches;
+    private IActionSource actionSource;
     @Shadow
     @Final
     private IConfigManager configManager;
@@ -101,8 +110,6 @@ public abstract class MixinPatternProvider {
     @Shadow
     private PatternProviderLogicHost host;
 
-    @Unique
-    private MEStorage storage;
 
 
     @Unique
@@ -123,7 +130,28 @@ public abstract class MixinPatternProvider {
     }
 
     @Unique
-    public boolean enhancedBlockingMode$onlyHasPatternInput(Set<AEKey> patternInputs) {
+    public boolean enhancedBlockingMode$onlyHasPatternInput(Set<AEKey> patternInputs,BlockEntity thisBe,Direction side) {
+
+
+        MEStorage storage;
+        Level l = thisBe.getLevel();
+        BlockPos thisPos = thisBe.getBlockPos();
+        BlockPos pos = thisPos.relative(side);
+        storage = l.getCapability(AECapabilities.ME_STORAGE, pos, side);
+        if (storage == null) {
+            var strategies = StackWorldBehaviors.createExternalStorageStrategies((ServerLevel) l,pos,side);
+            var externalStorages = new IdentityHashMap<AEKeyType, MEStorage>(2);
+            for (var entry : strategies.entrySet()) {
+                var wrapper = entry.getValue().createWrapper(false, Runnables.doNothing());
+                if (wrapper != null) {
+                    externalStorages.put(entry.getKey(),wrapper);
+                }
+            }
+            storage = new CompositeStorage(externalStorages);
+        }
+
+
+
         for (var stack : storage.getAvailableStacks()) {
             if (patternInputs.contains(stack.getKey().dropSecondary())) continue;
             return false;
@@ -189,7 +217,11 @@ public abstract class MixinPatternProvider {
 
             if (this.isBlocking() && adapter.containsPatternInput(this.patternInputs)) {
                 if (this.enhancedBlockingMode$getBlockingMode() == BlockingMode.ENHANCED) {
-                    if ((this.enhancedBlockingMode$onlyHasPatternInput(patternInputs))) {
+                    Set<AEKey> KeySet = new java.util.HashSet<>(Set.of());
+                    for (var KeyCounter : inputHolder) {
+                        KeySet.addAll(KeyCounter.keySet());
+                    }
+                    if ((this.enhancedBlockingMode$onlyHasPatternInput(KeySet,host.getBlockEntity(),direction))) {
                         if (this.enhancedBlockingMode$adapterAcceptAll(adapter,inputHolder)) {
                             patternDetails.pushInputsToExternalInventory(inputHolder, (what, amount) -> {
                                 var inserted = adapter.insert(what, amount, Actionable.MODULATE);

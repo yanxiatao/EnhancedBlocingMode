@@ -5,8 +5,7 @@
   "compatibilityLevel": "JAVA_21",
   "refmap": "EnhancedBlockingMode.refmap.json",
   "mixins": [
-    "patternprovider.MixinPatternProvider",
-    "patternprovider.MixinPatternProviderTarget"
+    "patternprovider.MixinPatternProvider"
   ],
   "client": [
   ],
