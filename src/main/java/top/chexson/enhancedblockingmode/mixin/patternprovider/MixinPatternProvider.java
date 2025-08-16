@@ -156,6 +156,10 @@ public abstract class MixinPatternProvider implements IPatternProvider {
 
         for (var stack : storage.getAvailableStacks()) {
             if (patternInputs.contains(stack.getKey().dropSecondary())) continue;
+            for (var key : patternInputs) {
+                if (storage.getAvailableStacks().keySet().contains(key.dropSecondary())) continue;
+                return false;
+            }
             return false;
         }
         return true;

@@ -5,11 +5,12 @@
   "compatibilityLevel": "JAVA_21",
   "refmap": "EnhancedBlockingMode.refmap.json",
   "mixins": [
-    "MixinSettings",
+    "misc.MixinSettings",
     "patternprovider.MixinPatternProvider",
     "patternprovider.MixinPatternProviderMenu"
   ],
   "client": [
+    "misc.MixinSettingToggleButton",
     "patternprovider.MixinPatternProviderScreen"
   ],
   "injectors": {

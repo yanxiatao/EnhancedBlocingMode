@@ -15,10 +15,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import top.chexson.enhancedblockingmode.EnhanceBlockingMode;
 import top.chexson.enhancedblockingmode.EnSettings;
+import top.chexson.enhancedblockingmode.IEnhanceBlockingMode;
 import top.chexson.enhancedblockingmode.IPatternProvider;
 
 @Mixin(value = PatternProviderScreen.class,remap = false)
-public abstract class MixinPatternProviderScreen<C extends PatternProviderMenu> extends AEBaseScreen<C> {
+public abstract class MixinPatternProviderScreen<C extends PatternProviderMenu> extends AEBaseScreen<C>  implements IEnhanceBlockingMode {
     @Unique
     private ServerSettingToggleButton<EnhanceBlockingMode> enhancedBlockingMode$blockingMode;
 
@@ -39,6 +40,24 @@ public abstract class MixinPatternProviderScreen<C extends PatternProviderMenu> 
     @Inject(method = "updateBeforeRender", at=@At("TAIL"),remap = false)
     private void updateBeforeRender(CallbackInfo ci) {
         this.enhancedBlockingMode$blockingMode.set(((IPatternProvider) menu).enhancedBlockingMode$getBlockingMode());
+    }
+    @Override
+    public void enhancedBlocingMode$resetBlocking() {
+        this.enhancedBlockingMode$blockingMode.set(EnhanceBlockingMode.DEFAULT);
+    }
+
+    @Override
+    public EnhanceBlockingMode enhancedBlocingMode$getBlockingMode() {
+        return enhancedBlockingMode$blockingMode.getCurrentValue();
+    }
+
+    @Override
+    public void enhancedBlocingMode$setBlockingMode(EnhanceBlockingMode blockingMode){
+        enhancedBlockingMode$blockingMode.set(blockingMode);
+    }
+    @Override
+    public void enhancedBlocingMode$showBlocking() {
+        enhancedBlockingMode$blockingMode.setVisibility(true);
     }
 
 }
